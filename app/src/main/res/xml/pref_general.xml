@@ -1,0 +1,30 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="lock_preset"
+        android:summaryOff="Turn on to prevent accidental preset programming."
+        android:summaryOn="Turn off to allow preset programming"
+        android:title="@string/pref_title_lock_preset" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="screen_on"
+        android:summaryOff="Turn on to always keep screen on."
+        android:summaryOn="Turn off to allow screen to dim."
+        android:title="@string/pref_title_screen_awake" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="lock_screen_rotation"
+        android:summaryOff="Switch on to prevent screen rotation."
+        android:summaryOn="Switch off to allow screen rotation."
+        android:title="@string/pref_lock_screen_rotation" />
+
+    <com.marcel.guitarixdroid.view.LicencesDialogPreference
+        android:key="dialog_licences"
+        android:title="@string/pref_action_licenses"
+        android:positiveButtonText="@android:string/ok"
+        android:negativeButtonText="@null"/>
+
+</PreferenceScreen>

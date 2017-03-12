@@ -1,0 +1,15 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- These settings headers are only used on tablets. -->
+
+    <header
+        android:fragment="com.marcel.guitarixdroid.view.SettingsActivity$GeneralPreferenceFragment"
+        android:icon="@drawable/ic_info_white_24dp"
+        android:title="@string/pref_header_general" />
+
+    <header
+        android:fragment="com.marcel.guitarixdroid.view.SettingsActivity$NetworkPreferenceFragment"
+        android:icon="@drawable/ic_server_white_24dp"
+        android:title="@string/pref_header_network" />
+
+</preference-headers>
