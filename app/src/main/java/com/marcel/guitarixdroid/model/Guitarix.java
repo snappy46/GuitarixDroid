@@ -45,7 +45,29 @@ public class Guitarix {
     public void getPreferences(Context context){
         SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(context);
         address = SP.getString("ip_host", "");
-        port = Integer.parseInt(SP.getString("port", "7000"));
+        String portString = SP.getString("port", "7000");
+        if (isNumeric(portString)) {
+            port = Integer.parseInt(portString);
+        }
+        else port = 7000;
+    }
+
+    /**
+     * Check if string is a number
+     * @param str string to be evaluated
+     * @return true if string is a number; false otherwise
+     */
+    public static boolean isNumeric(String str)
+    {
+        try
+        {
+            double d = Double.parseDouble(str);
+        }
+        catch(NumberFormatException nfe)
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
