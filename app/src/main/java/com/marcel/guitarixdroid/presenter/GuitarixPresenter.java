@@ -20,12 +20,18 @@ package com.marcel.guitarixdroid.presenter;
 
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
 
 import com.marcel.guitarixdroid.model.Guitarix;
+import com.marcel.guitarixdroid.model.NoteData;
 import com.marcel.guitarixdroid.model.ResponseBankPresetList;
+import com.marcel.guitarixdroid.model.ResponseTuner;
 import com.marcel.guitarixdroid.model.ResultBankPresetList;
+import com.marcel.guitarixdroid.util.NoteConverter;
 import com.marcel.guitarixdroid.view.MainActivityView;
+import com.marcel.guitarixdroid.view.TunerActivity;
+import com.marcel.guitarixdroid.view.TunerActivityView;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,12 +69,17 @@ public class GuitarixPresenter implements Presenter {
     // instanciate mainview interface
     private MainActivityView view;
 
+    // instanciate Tuner view interface
+    private TunerActivityView tunerView;
+
     // instanciate guitarix API
     private final Guitarix guitarix = new Guitarix();
 
 
     // hold current bank and preset string
     private String currentBankPreset;
+
+   /// private ResponseTuner currentTunerParams;
 
     // integer that represent the position of the previous ImageView that was clicked
     private int previousImageClicked = -1;
@@ -77,6 +88,8 @@ public class GuitarixPresenter implements Presenter {
     private boolean socketConnected = false;
 
     private final String TAG = "GuitarixPresenter";
+
+    private Handler handler = new Handler();
 
     /**
      * presenter constructor
@@ -87,10 +100,14 @@ public class GuitarixPresenter implements Presenter {
         this.view = view;
     }
 
+    public GuitarixPresenter(TunerActivity tunerView) {
+        this.tunerView = tunerView;
+    }
+
     @Override
     public void onCreate() {
-        guitarix.getPreferences(view.getContext());
-        new GuitarixPresenter.checkGuitarixConnection().execute();
+     //   guitarix.getPreferences(view.getContext());
+     //   new GuitarixPresenter.checkGuitarixConnection().execute();
     }
 
     @Override
@@ -102,12 +119,44 @@ public class GuitarixPresenter implements Presenter {
     public void onResume() {
         restoreBankPresetPreferences();
         guitarix.getPreferences(view.getContext());
+        new GuitarixPresenter.checkGuitarixConnection().execute();
         setAllPresetText();
     }
 
     @Override
     public void onDestroy() {
 
+    }
+
+    @Override
+    public void tunerStart(boolean on){
+        new GuitarixPresenter.ControlTunerMode(on).execute();
+        if (on)
+            handler.post(runnableCode);
+        else
+            handler.removeCallbacks(runnableCode);
+    }
+
+    private void getTunerValue() {
+        //tunerRun = false;
+        new GuitarixPresenter.RetrieveTunerParams().execute();
+    }
+
+    // Define the code block to be executed
+    private Runnable runnableCode = new Runnable() {
+        @Override
+        public void run() {
+            // Do something here on the main thread
+            getTunerValue();
+            Log.d("Handlers", "Called on main thread");
+            // Repeat this the same runnable code block again another .5 seconds
+            handler.postDelayed(runnableCode, 500);
+        }
+    };
+
+    @Override
+    public void tunerPreferences() {
+        guitarix.getPreferences(tunerView.getContext());
     }
 
 
@@ -424,6 +473,64 @@ public class GuitarixPresenter implements Presenter {
             } else {
                 socketConnected = false;
                 view.showConnectionErrorDialog();
+            }
+        }
+    }
+
+
+    /**
+     * AsyncTask class to set guitarix tuner mode
+     */
+    private class ControlTunerMode extends AsyncTask<Void, Void, Void> {
+
+        private boolean tunerOn;
+
+        /**
+         * Set guitarix bank and preset to the specified parameters
+         *
+         * @param tunerOn  boolean that specify the tuner mode (on = true/off =false)
+         */
+        ControlTunerMode(boolean tunerOn) {
+            super();
+            this.tunerOn = tunerOn;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            guitarix.listenToTuner(tunerOn);
+            return null;
+        }
+    }
+
+    private class RetrieveTunerParams extends AsyncTask<Void, Void, ResponseTuner> {
+
+        @Override
+        protected ResponseTuner doInBackground(Void... voids) {
+            try {
+                return guitarix.getTunerParams();
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to retrieve tuner params", e);
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(ResponseTuner tunerParams) {
+            if (tunerParams != null) {
+                double tuneFreq = tunerParams.getParams().get(0);
+                String tunerValue = String.valueOf(tuneFreq);
+                NoteData note = NoteConverter.frequencyToNote(tuneFreq);
+                String noteString = note.getNote();
+                int cents = note.getCents();
+                tunerView.updateTunerValue(tunerValue, noteString, cents);
+
+               // tunerView.updateTunerValue(String.valueOf(currentTunerParams.getParams().get(0)));
+              //  Log.d(TAG, "tuner params= " + String.valueOf(currentTunerParams.getParams().get(0)));
+              //  System.out.println("tuner params= " + String.valueOf(currentTunerParams.getParams().get(0)));
+
+            } else {
+                Log.e(TAG, "tuner params = null");
+                System.out.println("FROM SERVER (Socket): " + "null");
             }
         }
     }

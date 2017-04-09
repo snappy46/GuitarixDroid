@@ -44,6 +44,13 @@ public class SocketClient {
     private Socket socket;
     private final String TAG = "SocketClient";
 
+
+    /**
+     * Default constructor
+     */
+    public SocketClient() {
+    }
+
     /**
      * Default constructor
      * @param addr IP address or hostname as a string
@@ -55,12 +62,25 @@ public class SocketClient {
     }
 
     /**
+     * Set socket IP address and port
+     * @param dstAddress  IP address
+     * @param dstPort  Port number
+     */
+    public void setDstAddressAndPort(String dstAddress, int dstPort) {
+        this.dstAddress = dstAddress;
+        this.dstPort = dstPort;
+    }
+
+
+    /**
      * Open socket and throw IO exception if socket communication cannot be established.
      * @return true is connection is established; false otherwise.
      */
     public boolean openSocket() {
         try {
-            socket = new Socket(dstAddress, dstPort);
+            if (socket == null) {
+                socket = new Socket(dstAddress, dstPort);
+            }
         } catch (IOException e) {
             Log.e(TAG, "Cannot open socket", e);
             return false;
@@ -89,18 +109,18 @@ public class SocketClient {
      */
     public String receiveJSON() {
         if (socket != null) {
-            String response = "";
+            String response;
             try {
                 BufferedReader inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 response = inFromServer.readLine();
 
             } catch (UnknownHostException e) {
                 response = "UnknownHostException: " + e.toString();
-                Log.e(TAG, response);
+                Log.e(TAG, response);System.out.println("FROM SERVER (Socket): " + response);
             } catch (IOException e) {
                 response = "IOException: " + e.toString();
                 Log.e(TAG, response);
-            } finally {
+            } /*finally {
                 if (socket != null) {
                     try {
                         socket.close();
@@ -109,7 +129,8 @@ public class SocketClient {
                         Log.e(TAG, response);
                     }
                 }
-            }
+            } */
+            System.out.println("FROM SERVER (Socket): " + response);
             return response;
         }
         return null;
@@ -124,8 +145,11 @@ public class SocketClient {
         if (socket != null && buildParam() != null) {
             try {
                 String jsonrpcRequest = buildParam().toString();
+                clearParams();
+                id= -1;
                 DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
                 outToServer.writeBytes(jsonrpcRequest + '\n');
+                System.out.println("TO SERVER (Socket): " + jsonrpcRequest);
                 return true;
             } catch (UnknownHostException e) {
                 Log.e(TAG, "Unable to send JSON string", e);
@@ -153,6 +177,15 @@ public class SocketClient {
      */
     public void addParam(String mStrparams) {
         params.put(mStrparams);
+    }
+
+    public void addParam(int mIntParams) {
+        params.put(mIntParams);
+    }
+
+    private void clearParams() {
+        params = null;
+        params = new JSONArray();
     }
 
     /**
@@ -187,7 +220,6 @@ public class SocketClient {
             Log.e(TAG, "Error building JSON object string", e);
             object = null;
         }
-
         return object;
     }
 

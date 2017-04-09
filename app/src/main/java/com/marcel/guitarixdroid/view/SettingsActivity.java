@@ -88,7 +88,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     private void setupActionBar() {
         LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
-        Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.toolbar_settings, root, false);
+        Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.toolbar, root, false);
         root.addView(toolbar, 0);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();

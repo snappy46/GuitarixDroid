@@ -269,6 +269,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityView,
                     .show();
             return true;
         }
+        if (id == R.id.action_tuning) {
+            Intent tuner = new Intent(this, TunerActivity.class);
+            startActivity(tuner);
+        }
 
         return super.onOptionsItemSelected(item);
     }

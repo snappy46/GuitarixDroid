@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+ <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     android:orientation="vertical">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar"/>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+    <TextView
+        android:id="@+id/freq_label_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:textSize="24sp"
+        android:text="@string/frequency_label"
+        android:gravity="center"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
+
+    <TextView
+        android:id="@+id/tuner_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/freq_label_textview"
+        android:layout_toEndOf="@id/freq_label_textview"
+        android:layout_margin="16dp"
+        android:textSize="24sp"
+        android:gravity="center"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
+
+    <TextView
+        android:id="@+id/freq_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/tuner_textView"
+        android:layout_toEndOf="@id/tuner_textView"
+        android:layout_margin="16dp"
+        android:textSize="24sp"
+        android:text="@string/freq_unit"
+        android:gravity="center"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
+
+    </RelativeLayout>
+
+    <com.github.anastr.speedviewlib.ImageSpeedometer
+        android:id="@+id/imageSpeedometer"
+        android:layout_width="@dimen/tuner_size"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        app:sv_image="@drawable/gauge"
+        app:sv_indicator="TriangleIndicator"
+        app:sv_maxSpeed="50"
+        app:sv_minSpeed="-50"
+        app:sv_startDegree="155"
+        app:sv_endDegree="385"
+        app:sv_withTremble="false"
+        app:sv_speedTextColor="#FFFFFF"
+        app:sv_unitTextColor="@android:color/transparent"
+        app:sv_speedTextSize="20sp"
+        app:sv_speedTextPosition="BOTTOM_CENTER"
+        app:sv_unitUnderSpeedText="true"/>
+
+     <TextView
+         android:id="@+id/note_textview"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_gravity="center_horizontal"
+         android:layout_margin="16dp"
+         android:gravity="center"
+         android:textSize="36sp"
+         android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
+
+    </LinearLayout>

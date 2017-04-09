@@ -18,4 +18,6 @@ public interface Presenter {
     void onImageViewClicked(int imageViewPosition);
     void onConnectMenuClicked ();
     void clearAllPreset();
+    void tunerStart(boolean on);
+    void tunerPreferences();
 }

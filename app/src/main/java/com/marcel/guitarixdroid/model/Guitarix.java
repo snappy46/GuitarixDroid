@@ -35,8 +35,8 @@ public class Guitarix {
     // Mapper used to map API responses
     private ObjectMapper mapper = new ObjectMapper();
 
-    private String address; // Holds Guitarix server IP address;
-    private int port;  // holds Guitarix server Port number;
+    private final SocketClient mySocket = new SocketClient();
+    private final SocketClient tunerSocket = new SocketClient();
 
     /**
      * Retrieves IP address and Port number from settings
@@ -44,12 +44,15 @@ public class Guitarix {
      */
     public void getPreferences(Context context){
         SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(context);
-        address = SP.getString("ip_host", "");
+        String address = SP.getString("ip_host", "0.0.0.0");
         String portString = SP.getString("port", "7000");
+        int port;
         if (isNumeric(portString)) {
             port = Integer.parseInt(portString);
         }
         else port = 7000;
+        mySocket.setDstAddressAndPort(address, port);
+        tunerSocket.setDstAddressAndPort(address, port);
     }
 
     /**
@@ -57,7 +60,7 @@ public class Guitarix {
      * @param str string to be evaluated
      * @return true if string is a number; false otherwise
      */
-    public static boolean isNumeric(String str)
+    private static boolean isNumeric(String str)
     {
         try
         {
@@ -73,17 +76,15 @@ public class Guitarix {
     /**
      * Retrieve Guitarix current bank value
      * @return Guitarix current bank as a string
-     * @throws IOException
+     * @throws IOException if socket is closed or not available
      */
     public String getCurrentBank() throws IOException {
-        final SocketClient mySocket = new SocketClient(address, port);
         if (mySocket.openSocket()) {
             mySocket.setId(1);
             mySocket.addParam("system.current_bank");
             mySocket.setMethod("get");
             mySocket.sendJSON();
             ResponseBankPreset response = mapper.readValue(mySocket.receiveJSON(), ResponseBankPreset.class);
-            mySocket.closeSocket();
             return response.getResult().getSystemCurrentBank();
         }
         return null;
@@ -92,17 +93,15 @@ public class Guitarix {
     /**
      * Retrieve Guitarix current preset value
      * @return Guitarix current preset as string
-     * @throws IOException
+     * @throws IOException if socket is closed or not available
      */
     public String getCurrentPreset() throws IOException {
-        final SocketClient mySocket = new SocketClient(address, port);
         if (mySocket.openSocket()) {
             mySocket.setId(2);
             mySocket.addParam("system.current_preset");
             mySocket.setMethod("get");
             mySocket.sendJSON();
             ResponseBankPreset response = mapper.readValue(mySocket.receiveJSON(), ResponseBankPreset.class);
-            mySocket.closeSocket();
             return response.getResult().getSystemCurrentPreset();
         }
         return null;
@@ -112,10 +111,9 @@ public class Guitarix {
      * Retrieve Guitarix current bank and preset value
      * @return Guitarix current bank and preset as a concatenated string with bank and preset separated with
      * a colon (:)
-     * @throws IOException
+     * @throws IOException if socket is closed or not available
      */
     public String getCurrentBankAndPreset () throws IOException {
-        final SocketClient mySocket = new SocketClient(address, port);
         if (mySocket.openSocket()) {
             StringBuilder formattedResponse = new StringBuilder();
             mySocket.setId(3);
@@ -127,7 +125,6 @@ public class Guitarix {
             formattedResponse.append(response.getResult().getSystemCurrentBank());
             formattedResponse.append(" : ");
             formattedResponse.append(response.getResult().getSystemCurrentPreset());
-            mySocket.closeSocket();
             return formattedResponse.toString();
         }
         return null;
@@ -136,10 +133,9 @@ public class Guitarix {
     /**
      * Retrieve Guitarix full bank and preset list currently available.
      * @return RepknseBankPresetList class holding the bank and preset list.
-     * @throws IOException
+     * @throws IOException if socket is closed or not available
      */
     public ResponseBankPresetList getBankAndPresetList () throws IOException {
-        final SocketClient mySocket = new SocketClient(address, port);
         if (mySocket.openSocket()) {
             mySocket.setId(1);
             mySocket.setMethod("banks");
@@ -156,7 +152,6 @@ public class Guitarix {
      * @return true if operation was successful; false otherwise.
      */
     public boolean setBankAndPreset(String bank, String preset) {
-        final SocketClient mySocket = new SocketClient(address, port);
         if (mySocket.openSocket()) {
             mySocket.addParam(bank);
             mySocket.addParam(preset);
@@ -166,16 +161,53 @@ public class Guitarix {
         return false;
     }
 
+
+    /**
+     * method to turn on or off Guitarix tuner parameters
+     * @param tunerOn true to turn on tuner params; false to turn off tuner params
+     * @return true when operation is successful
+     */
+    public boolean listenToTuner(boolean tunerOn) {
+        if (tunerSocket.openSocket()) {
+            if (tunerOn) {
+                tunerSocket.addParam(1);
+                tunerSocket.setMethod("switch_tuner");
+                if (tunerSocket.sendJSON()) {
+                    tunerSocket.addParam("freq");
+                    tunerSocket.addParam("tuner");
+                    tunerSocket.setMethod("listen");
+                    return tunerSocket.sendJSON();
+                }
+                return false;
+            }
+            else {
+                    tunerSocket.addParam(0);
+                    tunerSocket.setMethod("switch_tuner");
+                    return tunerSocket.sendJSON();
+            }
+        }
+        return false;
+    }
+
+    /**  receive socket tuner socket response and map data received to the ResponseTuner class
+     *
+     * @return  mapped ResponseTuner class data
+     * @throws IOException if socket is closed or not available
+     */
+    public ResponseTuner getTunerParams() throws IOException {
+        if (tunerSocket.openSocket()) {
+            return mapper.readValue(tunerSocket.receiveJSON(), ResponseTuner.class);
+        }
+        return null;
+    }
+
+
     /**
      * Check to see if Guitarix server is reacheable
      * @return true if reacheable otherwise returns false.
      */
     public boolean isGuitarixReacheable() {
-        final SocketClient mySocket = new SocketClient(address, port);
-            if (mySocket.openSocket()) {
-                mySocket.closeSocket();
-                 return true;
-            }
+            if (mySocket.openSocket()) return true;
         return false;
     }
 

@@ -23,4 +23,7 @@
     <color name="drawerBackground">#FFfafafa</color>
     <color name="rowBackground">#34474F</color>
 
+    <color name="gaugeLowSection">#FFFF00</color>
+    <color name="gaugeMediumSection">#76FF03</color>
+
 </resources>

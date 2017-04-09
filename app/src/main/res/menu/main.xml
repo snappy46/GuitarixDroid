@@ -11,19 +11,25 @@
         android:icon="@drawable/ic_action_not_connected"
         app:showAsAction="always" />
     <item
-        android:id="@+id/action_clear_preset"
+        android:id="@+id/action_tuning"
         android:orderInCategory="200"
+        android:title="@string/connect"
+        android:icon="@drawable/ic_action_tuning_fork_white"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_clear_preset"
+        android:orderInCategory="300"
         android:title="Clear Preset"
         android:icon="@drawable/ic_action_clear_white_24dp"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_settings"
-        android:orderInCategory="300"
+        android:orderInCategory="400"
         android:title="@string/action_settings"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_about"
-        android:orderInCategory="400"
+        android:orderInCategory="500"
         android:title="@string/action_about"
         app:showAsAction="never" />
 </menu>
